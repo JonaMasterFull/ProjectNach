@@ -1,0 +1,6 @@
+# Netlify solo sirve archivos estáticos; no ejecuta Express ni MongoDB.
+# Este sitio muestra public/index.html como página de estado del API.
+# Para el API en vivo (/api/users) despliega el backend en Render, Railway, etc.
+
+[build]
+  publish = "public"
