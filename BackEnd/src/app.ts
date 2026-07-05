@@ -1,5 +1,6 @@
 import express, { Application } from "express";
 import cors from "cors";
+import path from "path";
 import userRouter from "./routes/user.route";
 
 export const createApp = (): Application => {
@@ -27,6 +28,7 @@ export const createApp = (): Application => {
     }),
   );
 
+  app.use(express.static(path.join(__dirname, "../public")));
   app.use("/api", userRouter);
   return app;
 }
