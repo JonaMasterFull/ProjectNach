@@ -1,80 +1,74 @@
 # ProjectNach
 
-App para registrar usuarios en **Elektra** y **ShopingBaz**. La persona escribe su nombre, el navegador lo encripta antes de mandarlo, el servidor le asigna un número de turno por tienda y se lo devuelve también encriptado para mostrarlo en pantalla.
+App para registrar usuarios en **Elektra** y **ShopingBaz**. La persona escribe su nombre, el navegador lo encripta antes de enviarlo, el servidor le asigna un número de turno por tienda y lo devuelve encriptado para mostrarlo en pantalla.
 
 ## Qué hace el flujo
 
 1. Entras a la pantalla de bienvenida. Según el `iP` de la URL ves Elektra o ShopingBaz.
 2. Escribes tu nombre (o lo dictas con el micrófono).
-3. El frontend encripta el nombre y lo manda al backend junto con la tienda.
-4. El backend guarda el registro, calcula el siguiente número de esa tienda y te lo regresa encriptado.
-5. En la pantalla de resultado el frontend lo desencripta y te muestra tu número.
+3. El frontend encripta el nombre y lo envía al backend junto con la tienda.
+4. El backend guarda el registro, calcula el siguiente número de esa tienda y lo regresa encriptado.
+5. En la pantalla de resultado el frontend lo desencripta y muestra tu número.
 
 Cada tienda lleva su propia numeración: Elektra va 1, 2, 3… y ShopingBaz igual, por su lado.
 
 ---
 
-## Por qué lo hicimos así
+## Por qué está hecho así
 
-### Sobre el cifrado
+### Cifrado
 
-Queríamos que el nombre no viajara legible por la red. Por eso se encripta en el navegador antes del envío.
+El nombre no viaja legible por la red: se encripta en el navegador antes del envío.
 
-El número de turno sí se guarda en claro en la base de datos (así podemos saber cuál sigue), pero al usuario se le regresa encriptado y solo se lee en su pantalla.
+El número de turno se guarda en claro en la base de datos para poder generar la secuencia, pero al usuario se le regresa encriptado y solo se muestra en su pantalla.
 
-Frontend y backend usan la misma clave, derivada de `APP_SECRET` y `SALT`. Esos dos valores tienen que coincidir en ambos lados.
+Frontend y backend comparten la misma clave, derivada de `APP_SECRET` y `SALT`. Esos dos valores deben coincidir en ambos lados.
 
-No metimos librerías raras de cifrado: en el navegador usamos lo que ya trae, y en el servidor lo de Node. El código de crypto quedó repartido en archivos chicos para que se entienda mejor.
-
-Ojo: las variables `VITE_*` del frontend se ven en el código compilado. El cifrado cumple su papel en el flujo, pero no es un vault impenetrable.
+Las variables `VITE_*` del frontend quedan en el código compilado. El cifrado protege el flujo de datos, pero no sustituye un manejo seguro de secretos en el servidor.
 
 ### Dos marcas, una sola app
 
-En vez de duplicar la app, cambiamos colores, textos y logos con archivos JSON de tema.
+En lugar de duplicar la aplicación, los colores, textos y logos se configuran con archivos JSON de tema.
 
-El `iP` en la URL elige la tienda: `1` es Elektra, `2` es ShopingBaz. Para agregar otra marca hay que sumar tema, logo y una línea en la config de rutas.
+El `iP` en la URL elige la tienda: `1` es Elektra, `2` es ShopingBaz. Para agregar otra marca hay que sumar tema, logo y su entrada en la configuración de rutas.
 
 ### Pantallas y navegación
 
 Hay dos pantallas: bienvenida (`/pages/intro`) y resultado (`/pages/result`).
 
-Al pasar al resultado, el nombre y el número encriptado viajan en memoria, no en la URL. Si alguien recarga la pantalla de resultado, vuelve al inicio. Así evitamos dejar datos en el link.
+Al pasar al resultado, el nombre y el número encriptado viajan en memoria, no en la URL. Si se recarga la pantalla de resultado, la app regresa al inicio para no exponer datos en el enlace.
 
-En Netlify el frontend necesita un `_redirects` para que esas rutas no den 404 al entrar directo o al refrescar.
+En Netlify, el frontend usa `_redirects` para que esas rutas funcionen al entrar directo o al refrescar la página.
 
 ### Dictado por voz
 
-Usamos la API de voz del navegador. No cuesta extra ni pide API key. Solo agregamos helpers propios para mensajes en español y para formatear lo que se escucha.
+Se usa la API de voz del navegador, sin servicios externos ni costo adicional. Los mensajes al usuario están en español y el texto dictado se formatea antes de mostrarse.
 
-### Código y tests
+### Tests
 
-En frontend y backend usamos funciones flecha (`const algo = () => {}`) en todo el proyecto.
+En el backend hay pruebas unitarias con mocks: no requieren MongoDB ni llamadas HTTP reales.
 
-En el backend solo hay pruebas unitarias, con mocks. Son rápidas y no necesitan levantar Mongo ni pegarle al API de verdad.
+En el frontend se prueban funciones, componentes y hooks de forma aislada.
 
-En el frontend probamos funciones, componentes y hooks. Donde hace falta tema usamos un wrapper; donde solo es lógica, probamos el hook directo.
+Para cobertura: `npm run coverage` en cualquiera de los dos proyectos.
 
-Para cobertura: `npm run coverage` en cualquiera de los dos.
+### Producción
 
-### Dónde va cada cosa en producción
+El proyecto se despliega en dos partes:
 
-Aquí nos confundimos un rato y vale la pena dejarlo claro:
+**Frontend (Netlify)** — la app React. Build con `npm run build`, publish en `dist`.
 
-**Frontend en Netlify** — ahí vive la app React. Compilas con `npm run build` y publicas la carpeta `dist`.
+**Backend en Netlify** — solo la página de estado en `public/` (“Hola mundo”). No ejecuta el API: Netlify no corre Express ni MongoDB.
 
-**Backend en Netlify** — solo sirve la paginita de “Hola mundo” en `public/`. Confirma que el repo backend existe, pero **no corre el API**. Netlify no levanta Express ni MongoDB.
+**Backend API** — debe estar en un servicio Node (Render, Railway, VPS, etc.) con `npm run build` y `npm start`.
 
-**Backend de verdad (el API)** — tiene que estar en un servicio que corra Node: Render, Railway, un VPS, lo que prefieras. Ahí sí: `npm run build` y `npm start`.
-
-Si el frontend en producción no puede registrar usuarios, casi seguro `VITE_API_URL` apunta a `localhost` o no está configurada en Netlify. Vite mete esas variables al compilar, así que hay que definirlas **antes** del deploy y volver a publicar.
-
-Variables del frontend en Netlify (producción):
+Las variables del frontend se incluyen al compilar. En Netlify deben definirse antes del deploy:
 
 - `VITE_API_URL` — URL pública del backend con `/api` al final
-- `VITE_APP_SECRET` — igual que en el backend
-- `VITE_SALT` — igual que en el backend
+- `VITE_APP_SECRET` — mismo valor que en el backend
+- `VITE_SALT` — mismo valor que en el backend
 
-En local, copia `.env.template` a `.env.local` y no subas secretos al repo.
+En local, usa `.env.template` como referencia y guarda los secretos en `.env.local` sin subirlos al repositorio.
 
 ---
 
@@ -87,7 +81,7 @@ En local, copia `.env.template` a `.env.local` y no subas secretos al repo.
 
 ```
 ProjectNach/
-├── BackEnd/    → API, MongoDB, pagina de estado
+├── BackEnd/    → API, MongoDB, página de estado
 └── FrontEnd/   → App React con temas Elektra / ShopingBaz
 ```
 
@@ -100,7 +94,7 @@ cd BackEnd
 npm install
 ```
 
-Mira `BackEnd/.env.template` y crea tu `.env` con los valores reales.
+Revisa `BackEnd/.env.template` y crea tu `.env` con los valores correspondientes.
 
 **Frontend**
 
@@ -109,7 +103,7 @@ cd FrontEnd
 npm install
 ```
 
-Copia `FrontEnd/.env.template` a `.env.local` y llena los secretos.
+Copia `FrontEnd/.env.template` a `.env.local` y completa los secretos.
 
 ## Correr en local
 
@@ -122,7 +116,7 @@ cd BackEnd
 npm run dev
 ```
 
-Queda en http://localhost:3000. El API está en `/api/users`. En `/` ves el “Hola mundo”.
+Disponible en http://localhost:3000. El API está en `/api/users`. En `/` se muestra la página de estado.
 
 Frontend:
 
@@ -131,20 +125,18 @@ cd FrontEnd
 npm run dev
 ```
 
-Queda en http://localhost:5173.
+Disponible en http://localhost:5173.
 
-Links de prueba:
+Enlaces de prueba:
 
 - http://localhost:5173/pages/intro?iP=1 → Elektra
 - http://localhost:5173/pages/intro?iP=2 → ShopingBaz
 
 ## API
 
-Un solo endpoint importante:
-
 **POST `/api/users`**
 
-Manda:
+Body:
 
 ```json
 {
@@ -153,7 +145,7 @@ Manda:
 }
 ```
 
-Te responde con el número encriptado, el nombre que recibió y la tienda. `storeType` puede ser `Elektra` o `ShopingBaz`.
+Respuesta: número encriptado, nombre recibido y tienda. `storeType` acepta `Elektra` o `ShopingBaz`.
 
 ## Tests
 
@@ -171,22 +163,21 @@ cd FrontEnd
 npm test
 ```
 
-En ambos también puedes usar `npm run test:watch` y `npm run coverage`.
+También disponibles: `npm run test:watch` y `npm run coverage`.
 
 ## Producción
 
 **Frontend (Netlify)**
 
-- Carpeta base: `FrontEnd`
+- Base directory: `FrontEnd`
 - Build: `npm run build`
-- Publicar: `dist`
+- Publish: `dist`
 - Variables: `VITE_API_URL`, `VITE_APP_SECRET`, `VITE_SALT`
 
-**Backend — pagina de estado (Netlify)**
+**Backend — página de estado (Netlify)**
 
-- Carpeta base: `BackEnd`
-- Publicar: `public` (ya está en `netlify.toml`)
-- Solo muestra el Hola mundo
+- Base directory: `BackEnd`
+- Publish: `public` (configurado en `netlify.toml`)
 
 **Backend — API (servicio Node)**
 
@@ -196,18 +187,18 @@ npm run build
 npm start
 ```
 
-Necesitas `PORT`, `URL_DATABASE`, `APP_SECRET` y `SALT`. Si cambias el dominio del frontend, actualiza CORS en `app.ts`.
+Variables: `PORT`, `URL_DATABASE`, `APP_SECRET`, `SALT`. Si cambia el dominio del frontend, actualiza CORS en `app.ts`.
 
-## Si algo no jala
+## Problemas frecuentes
 
-- **No guarda el nombre en producción** → Revisa `VITE_API_URL` en Netlify. No puede ser localhost. Redeploy después de cambiarla.
-- **No muestra el número en resultado** → `VITE_APP_SECRET` y `VITE_SALT` no coinciden con el backend, o faltan en el build.
-- **404 en rutas del frontend** → Falta el `_redirects` o la carpeta de publish está mal.
-- **Netlify del backend sin Hola mundo** → Publish debe ser `public`, no `dist`.
-- **El API no responde en Netlify** → Es normal. El API va en otro servicio.
-- **Backend local no arranca** → Mongo caído o `.env` incompleto.
-- **Puerto 3000 ocupado** → `npm run kill` desde BackEnd.
+- **El registro falla en producción** — Verifica que `VITE_API_URL` en Netlify apunte al backend público (no a `localhost`) y vuelve a desplegar.
+- **No se muestra el número en resultado** — Confirma que `VITE_APP_SECRET` y `VITE_SALT` coincidan con el backend y estén definidos antes del build.
+- **404 en rutas del frontend** — Revisa que exista `public/_redirects` y que la carpeta de publish sea `dist`.
+- **La página de estado del backend no carga en Netlify** — El publish directory debe ser `public`, no `dist`.
+- **El API no responde en Netlify** — Es el comportamiento esperado; el API debe estar en un servicio Node.
+- **El backend local no inicia** — Revisa la conexión a MongoDB y que el `.env` esté completo.
+- **Puerto 3000 en uso** — Ejecuta `npm run kill` desde `BackEnd`.
 
 ## Stack
 
-Express + MongoDB + TypeScript en el backend. React + Vite + Tailwind en el frontend.
+Express, MongoDB y TypeScript en el backend. React, Vite y Tailwind en el frontend.
