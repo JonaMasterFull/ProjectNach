@@ -1,0 +1,13 @@
+{
+  "id": "ShopingBaz",
+  "texts": {
+    "welcomeTitleLine2": "bienvenida a shopinbaz!"
+  },
+  "colors": {
+    "title": "#c4b5fd",
+    "subtitle": "#ffffff"
+  },
+  "styles": {
+    "logoMaxWidth": "10rem"
+  }
+}

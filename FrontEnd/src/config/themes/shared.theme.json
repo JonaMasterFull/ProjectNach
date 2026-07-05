@@ -1,0 +1,52 @@
+{
+  "texts": {
+    "welcomeTitleLine1": "¡Te damos la",
+    "welcomeSubtitle": "Usa tu préstamo como dinero en efectivo o compra en donde quieras.",
+    "nameQuestion": "¿Cómo prefieres que te llamemos?",
+    "namePlaceholder": "Escribe tu nombre",
+    "startButton": "Comenzar",
+    "submittingButton": "Procesando...",
+    "submitError": "No se pudo registrar. Intenta de nuevo.",
+    "characterCounterTemplate": "{current}/{max} caracteres",
+    "nameMaxLength": 15,
+    "resultTitleLine1": "¡Todo listo!",
+    "resultTitleLine2": "Tu registro fue exitoso",
+    "resultGreeting": "Hola, {name}",
+    "resultNumberLabel": "Tu número de cliente es:",
+    "resultLoading": "Obteniendo tu número...",
+    "resultBackButton": "Volver al inicio",
+    "voiceInputStart": "Dictar nombre",
+    "voiceInputStop": "Detener dictado"
+  },
+  "colors": {
+    "background": "#1e1e1e",
+    "label": "rgba(255, 255, 255, 0.55)",
+    "inputText": "#ffffff",
+    "inputPlaceholder": "rgba(255, 255, 255, 0.35)",
+    "inputBorder": "#a3a3a3",
+    "inputBorderEmpty": "#ef4444",
+    "inputBorderFilled": "#22c55e",
+    "inputCounter": "#8c8c8c",
+    "buttonBackground": "#cccccc",
+    "buttonText": "#000000",
+    "buttonDisabledBackground": "#3a3a3a",
+    "buttonDisabledText": "#6b6b6b"
+  },
+  "styles": {
+    "fontFamily": "'Segoe UI', system-ui, sans-serif",
+    "titleFontSize": "1.75rem",
+    "titleFontWeight": "700",
+    "subtitleFontSize": "16px",
+    "labelFontSize": "20px",
+    "inputPlaceholderFontSize": "14px",
+    "buttonFontSize": "1rem",
+    "buttonFontWeight": "700",
+    "buttonBorderRadius": "9999px",
+    "buttonPadding": "1rem 1.5rem",
+    "inputBorderWidth": "1px",
+    "pagePaddingX": "1.5rem",
+    "pagePaddingBottom": "1.5rem",
+    "contentMaxWidth": "22rem",
+    "illustrationMaxWidth": "16rem"
+  }
+}

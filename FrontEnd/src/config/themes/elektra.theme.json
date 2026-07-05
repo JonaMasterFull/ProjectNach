@@ -1,0 +1,13 @@
+{
+  "id": "Elektra",
+  "texts": {
+    "welcomeTitleLine2": "bienvenida a Préstamo Elektra!"
+  },
+  "colors": {
+    "title": "#e85a4f",
+    "subtitle": "#b3b3b3"
+  },
+  "styles": {
+    "logoMaxWidth": "9rem"
+  }
+}
