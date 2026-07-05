@@ -12,7 +12,7 @@ export const createApp = (): Application => {
     cors({
       origin: (origin, callback) => {
         const allowedOrigins = [
-          "https://almacen-admin.vercel.app",
+          "https://frontendnach.netlify.app",
           "http://localhost:5173",
         ];
 
